@@ -1,0 +1,90 @@
+---
+title: "VR in a VM"
+date: 2016-10-03T14:04:31+01:00
+draft: true
+---
+
+# Running VR inside a Windows VM
+
+_(You can skip this part if you're only interested in the technological aspects)_
+The first VR devices haven been out for quite some time now and more are hitting the market soon. Sadly however, the ones aimed at the use with desktop PCs are only really compatible with Windows. Same then also goes for the games that support VR, but it's not new that Windows is biggest platform for games. Linux\* is getting better, but sadly VR isn't there yet.
+
+I personally use Linux currently as my main OS and will probably never change that anymore. I only run Windows as a second OS so I can play some games that just aren't available on Linux yet. However, dual booting was never really a pleasant experience to play the games. I have to close everything I'm doing, start windows, play games, come back and setup everything again to continue where I left off. So my dream was always to just run the second OS alongside the main OS without having to stop what I have been doing so far.
+
+Over time I've tried out the obvious things: VMs and Wine. Wine for me always looked like this thing that is a pain to setup. Luckily there are some premade wrappers in packages that I could use for some games, but Wine still couldn't really get the performance out that some games required. Simple games like Hearthstone were "ok", but anything more complex than that starts to fall apart. Not trying to bash in Wine here, it's a great piece of software, but it's not cutting it for me here sadly.
+
+But what about VMs? With a VM I would at least guarantee that I can run the game at all in the first place since I'm emulating the full OS, and not just a (potentially incomplete) layer on top. But full emulation has its price. While CPU and RAM was never really a problem inside the VM, the graphics really didn't offer much at all. Thanks to KVM the virtualization itself was running smoothly, but since the graphics were emulated too and not done directly on the graphics card, the visual performance was lacking at best. Here even windows Aero was lagging, not to mention even playing games there.
+
+However, in the last years this space has changed a bit and there is in fact a solution available now for pretty much everyone. You don't need the most bleeding edge hardware, many of the 3-4 year old hardware parts already have the requirements to support what I'm about to show in detail.
+
+# IOMMU, VT-d/AMD-Vi and PCI passthrough
+
+On top of exiting kernel virtualization, you can now map memmory groups from the host directly to the VM so it does not have to go through the virtualization software. Or you could say that we give the guest OS direct access to certain parts of the hardware. Which means that pretty much no performance loss compared to bare metal. Any PCI component can be mapped this way which includes, but is obviously not limited to, graphics cards! We can now "pass through" a graphics card to our guest so it has direct access without any emulation in between. Other possible PCI components that you might want to use this for could be: Soundcard, NIC or USB-Hub.
+
+## Requirements
+
+As I mentioned, most of the common hardware today is already supporting this. In this case, both the CPU and the Motherboard need to support the required specs in order for this to work. This is mainly VT-d/AMD-Vi (Intel/AMD), check with the manufacturer reference if your hardware has it. That's [Intel ARK](http://ark.intel.com/) for Intel CPUs and [Product Resource Center](http://products.amd.com/en-us/) for AMD CPUs. Look for the one you have and make sure it has the required support.
+
+For motherboards this is harder to find, but if most of the CPUs from that generation support it, the board will probably support it too. But it's always better to make sure.
+
+Obviously what you also need is a graphics card to pass over. That card will (at least for the time the VM is active) not be usable by the host and therefor can not be the only available card in the system. If your CPU has an integrated GPU or you have two graphics cards in your system, you're good. Other than that, there should should be nothing your graphics card needs in particular to work with this [^1]. There's also no difference between NVidia and AMD graphics cards, both work fine.
+
+Apart from that, there are no real hardware requirements to get this setup working. Obviously since you're still running another full OS, enough RAM to spare is good (>6GB dedicated to windows is probably about minimum for gaming). It might also be good at least 8 (virtual) cores available, so you can dedicate half of it to the VM for a good experience. Again, you're running two full OS's and 4 for each is about the minimum. You can also add another soundcard to pass over so, because otherwise both outputs are mixed together. These however are more "soft" requirements in that they might be required, depending on what you expect from the outcome, but are not necessary for the base setup.
+
+## My setup
+
+_(You can skip this part if you don't want to hear my bias.)_
+
+Since my goal was to run games or more specifically games in VR I had to go for the more higher tier hardware. I'm currently running 32GB RAM of which 16GB are dedicated to Windows VM together with 8 out of my 12 vcores from my i7-5820k CPU. 8 _might_ be more than it can use, but given the experiences from people I've talked to, 6 seems just barely enough to run VR so 8 makes it nicer. Since I was starting from a green field, going for the i7-5820k over a newer Skylake 8 vcore seemed reasonable.
+
+For GPU I got the GTX 1080, but this was more the case of "why not?" rather than me actually needing it. However, I also wanted to be safe here, because SLI/Crossfire will probably not work, single GPU performance is important here. If the budget is lower, the 1060 or the RX 480 should get the job done too.
+
+I also use a physical SSD to run the VM on. In my case a SanDisc with 480GB. SSDs are getting cheaper every year and are more and more worth it. And just for reference my mainboard is the ASRock Fatal1ty Killer x99x.
+
+
+# Setting things up
+
+To be honest, this part has been covered in many places and probably even better than I could. So let me just list a bunch of guides that go through the process step by step. However, since I don't like what most of them do, you'll find some changes I made right below.
+
+- [Arch Linux Wiki](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)
+- [Bufferoverflow](https://bufferoverflow.io/gpu-passthrough/)
+- [Reddit post](https://www.reddit.com/r/linux_gaming/comments/3lnpg6/gpu_passthrough_revisited_an_updated_guide_on_how/)
+
+You can probably find more with google, but this should be a good reference. Once you're done with this, you should be able to boot into windows on the VM and use your mouse and keyboard. So congrats, you've got a nice gaming VM! But like I said, most of the guides have some inconveniences that I want to work around. You can skip further down if you just want to see the VR setup part.
+
+## Gettings things neat and tidy
+
+There are two things that I did not like about these guides:
+- File based VM image
+- Requires sudo rights
+
+The latter was more an inconvenice for me rather than actually wanting to not elevate to sudo rights. On the other hand, it's also better to not letting the VM run with sudo. The former was probably a bit more specific to my setup because I wanted to let it run on a SSD directly, instead of having an image file somewhere.
+
+### Using a drive instead of an image for the VM
+
+Running a VM from an image file is nice for the start because you can easily remove it if you want to start over or if you just want to test things out first. But for the long run, running a file system inside the VM on top of the host file system is a little redundant, don't you think? On the other hand, creating a backup is way easier this way. But since we're doing a gaming VM, the stuff I would wand to back up is everything else, so I don't really care.
+
+So the plan here is the following:
+
+- Clear old drive and prepare for image
+- Convert file based VM image to a raw image - the drive itself
+- Hook it up to qemu
+
+The means _wiping all data from the old drive_. There should be nothing on there. Empty, unallocated space. You just use gparted or similar to achieve this step, this shouldn't really be hard to do.
+
+Next up is putting the image onto the drive. This part might sound hard, but is actually pretty easy. Thanks to `qemu-img`, we can convert our old image, from any format, to a new `raw` image. And not just that, we can tell it to output it directly onto our drive. To do that we run `qemu-img convert old_vm_img.img -O /dev/sdc` (assuming that the drive is available under `/dev/sdc`, other replace with yours). You might also need to run this with sudo since we're writing directly onto a drive. This might obviously take a while depending on how big your image was. If your drive has a different size than the image file, windows _should_ be able to take care of this (which it did for me, suprisingly). Otherwise you want to chkdisk or gparted to let them fix it. As long as you didn't shrink it, this shouldn't make any problems at all.
+
+Lastly, we need to tell qemu to now boot from that instead of the image file. With image file your qemu command line probably had something similar to this in it: `-drive if=virtio,id=drive0,file=./windows.img,format=raw`. You want to replace that with just `-hda /dev/sdc` (or whatever drive location you have).
+
+Now you should be able to boot just fine using the drive instead of the image file. Give windows some time here to fix the partition sizes. You will still need to run with root privileges here, but we'll get to fixing that now.
+
+### Getting rid of sudo
+
+To no longer needing to use sudo to start our VM, we need to change the permission of the vm drive and all the passed over USB and PCI devices. Because by default, a normal user does not have access to them, nor does the `qemu` user. 
+
+
+
+[^1]: I have read at some point that people had trouble getting BIOS based graphics cards to initialize properly. Most of the newer ones use UEFI however, but you might want to research this if you want to use an older card.
+
+
+_\* : I'm always talking about GNU/Linux here when I say Linux. Just to be factually correct._
