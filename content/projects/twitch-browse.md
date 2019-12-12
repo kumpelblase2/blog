@@ -15,4 +15,4 @@ Twitch does have methods to filter the amount of streams, but instead of removin
 
 # Status
 
-Seeker is live and can be seen [used](https://blog.eternalwings.de/seeker/). The main feature works well enough that it's usable. There are however still a few things that I want to work on, such as better mobile support and improving the usability of adding tags/languages to filter by. But in general I'm satisfied with what it can do so far. If you have any issues, feedback or suggestions, you can file an issue on [github](https://github.com/kumpelblase2/seeker) as well as checkout the source.
+Seeker is live and can be [found here](https://blog.eternalwings.de/seeker/). The main feature works well enough that it's usable. There are however still a few things that I want to work on, such as better mobile support and improving the usability of adding tags/languages to filter by. But in general I'm satisfied with what it can do so far. If you have any issues, feedback or suggestions, you can file an issue on [github](https://github.com/kumpelblase2/seeker) as well as checkout the source.
