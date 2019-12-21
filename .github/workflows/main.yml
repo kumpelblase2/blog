@@ -1,0 +1,28 @@
+name: Publish
+on:
+  push:
+    branches:
+     - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Checkout
+       uses: actions/checkout@v1
+     - name: Checkout submodules
+       run: git submodule update --init --recursive
+     - name: Get Hugo
+       uses: peaceiris/actions-hugo@10f36c7c9133c2fe4dba9a431e838d7c71980b13
+       with:
+         hugo-version: '0.61.0'
+         extended: true
+     - name: Build Site
+       run: hugo --minify
+     - name: Deploy
+       uses: peaceiris/actions-gh-pages@e4df4b2d92417e5081232ae92aa2229baadf18fe
+       env:
+         ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+         EXTERNAL_REPOSITORY: 'kumpelblase2/kumpelblase2.github.io'
+         PUBLISH_BRANCH: master
+         PUBLISH_DIR: ./public
