@@ -1,7 +1,7 @@
 baseURL = "https://blog.eternalwings.de/"
 languageCode = "en-us"
 title = "Re: boot"
-theme = 'hermit'
+theme = 'hermit-v2'
 
 pygmentsCodefences  = true
 pygmentsUseClasses  = true
