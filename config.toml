@@ -3,71 +3,68 @@ languageCode = "en-us"
 title = "Re: boot"
 theme = 'hermit-v2'
 
-pygmentsCodefences  = true
-pygmentsUseClasses  = true
+pygmentsCodefences = true
+pygmentsUseClasses = true
 
 rssLimit = 20
 
-[author]
-  name = "Tim Hagemann"
-
 [taxonomies]
-  tag = "tags"
+tag = "tags"
 
 [params]
-  dateform        = "2006/01/02"
-  dateformShort   = "02.01"
-  dateformNum     = "2006/01/02"
-  dateformNumTime = "2006/01/02 15:04 -0700"
+dateform = "2006/01/02"
+dateformShort = "02.01"
+dateformNum = "2006/01/02"
+dateformNumTime = "2006/01/02 15:04 -0700"
+readTime = false
 
-  # Metadata mostly used in document's head
-  # description = ""
-  # images = [""]
-  themeColor = "#494f5c"
+# Metadata mostly used in document's head
+# description = ""
+# images = [""]
+themeColor = "#494f5c"
 
-  homeSubtitle = "Boop boop beep boop beep boop beep boop"
-  footerCopyright = ' &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
-  # bgImg = ""  # Homepage background-image URL
+homeSubtitle = "Boop boop beep boop beep boop beep boop"
+footerCopyright = ' &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>'
+# bgImg = ""  # Homepage background-image URL
 
-  # Prefix of link to the git commit detail page. GitInfo must be enabled.
-  # gitUrl = "https://github.com/username/repository/commit/"
+# Prefix of link to the git commit detail page. GitInfo must be enabled.
+# gitUrl = "https://github.com/username/repository/commit/"
 
-  # Toggling this option needs to rebuild SCSS, requires Hugo extended version
-  justifyContent = false  # Set "text-align: justify" to `.content`.
+# Toggling this option needs to rebuild SCSS, requires Hugo extended version
+justifyContent = false # Set "text-align: justify" to `.content`.
 
-  relatedPosts = false  # Add a related content section to all single posts page
+relatedPosts = false # Add a related content section to all single posts page
 
-  code_copy_button = true # Turn on/off the code-copy-button for code-fields
-  
-  # Add custom css
-  # customCSS = ["css/foo.css", "css/bar.css"]
+code_copy_button = true # Turn on/off the code-copy-button for code-fields
 
-  # Social Icons
-  # Check https://github.com/Track3/hermit#social-icons for more info.
-  [[params.social]]
-    name = "twitter"
-    url = "https://twitter.com/kumpelblase2"
+[[params.socialLinks]]
+name = "twitter"
+url = "https://twitter.com/kumpelblase2"
 
-  [[params.social]]
-    name = "github"
-    url = "https://github.com/kumpelblase2"
+[[params.socialLinks]]
+name = "mastodon"
+url = "https://chaos.social/kumpelblase2"
 
-  [[params.social]]
-    name = "keybase"
-    url = "https://keybase.io/kumpelblase2"
+[[params.socialLinks]]
+name = "github"
+url = "https://github.com/kumpelblase2"
+
+[[params.socialLinks]]
+name = "keybase"
+url = "https://keybase.io/kumpelblase2"
 
 [menu]
-  [[menu.main]]
-    name = "Posts"
-    url = "posts/"
-    weight = 10
+[[menu.main]]
+name = "Posts"
+url = "posts/"
+weight = 10
 
-  [[menu.main]]
-    name = "Projects"
-    url = "projects/"
-    weight = 20
+[[menu.main]]
+name = "Projects"
+url = "projects/"
+weight = 20
 
-  [[menu.main]]
-    name = "About"
-    url = "about"
-    weight = 10
+[[menu.main]]
+name = "About"
+url = "about"
+weight = 10
