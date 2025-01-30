@@ -13,14 +13,14 @@ jobs:
      - name: Checkout submodules
        run: git submodule update --init --recursive
      - name: Get Hugo
-       uses: peaceiris/actions-hugo@10f36c7c9133c2fe4dba9a431e838d7c71980b13
+       uses: peaceiris/actions-hugo@v3
        with:
          hugo-version: '0.142.0'
          extended: true
      - name: Build Site
        run: hugo --minify
      - name: Deploy
-       uses: peaceiris/actions-gh-pages@e4df4b2d92417e5081232ae92aa2229baadf18fe
+       uses: peaceiris/actions-gh-pages@v3
        env:
          ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
          EXTERNAL_REPOSITORY: 'kumpelblase2/kumpelblase2.github.io'
