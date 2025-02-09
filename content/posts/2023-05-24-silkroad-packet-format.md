@@ -76,9 +76,9 @@ I won't cover more details here of what is exactly exchanged in which packet - y
 
 ## Packet data
 
-To actually read and write the necessary packets in the handshake, we need to know how we can read the bytes inside a packet. Unlike a self-describing format, if you don't know the structure of the data contained in a packet, you won't be able to parse the packet into a usable structure. And obviously Joymax is not interested in publishing a spec for the individual packet, so it's up to reverse engineering to figure out what the structure could be. Though there are obviously patterns that one can look for.
+To actually read and write the necessary packets in the handshake, we need to know how we can read the bytes inside a packet. Unlike a self-describing format, if you don't know the structure of the data contained in a packet, you won't be able to parse the packet into a usable structure. Just like how you wouldn't which bytes make up which pixels in an image file without also knowing the format, like png or jpg. And obviously Joymax is not interested in publishing a spec for the individual packets, so it's up to reverse engineering to figure out what the structure could be - for each individual operation. Though there are obviously patterns that one can look for.
 
-A thing of note here is Silkroad uses [little-endian notation](https://en.wikipedia.org/wiki/Endianness), even though in networking it's usually more common to use [big-endian notation](https://datatracker.ietf.org/doc/html/rfc1700#page-3). But with that out of the way, we can find most C data types to be represented as their binary in-memory representation, just with little-endian notation. This includes `bool` (1 byte), `char` (1 byte), short (2 bytes), int (4 bytes), and float (4 bytes). As example, the short `1337`, or `0x0539` in hex, would be represented as `[0x39, 0x05]` in the packet data. Without the self-describing nature, there generally no separators, type IDs, or other indicators showing where a value / field ends. In other words, the following struct:
+A thing of note here is Silkroad uses [little-endian notation](https://en.wikipedia.org/wiki/Endianness), even though in networking it's usually more common to use [big-endian notation](https://datatracker.ietf.org/doc/html/rfc1700#page-3). But with that in mind, we can find most C data types to be represented as their binary in-memory representation, just with little-endian notation. This includes `bool` (1 byte), `char` (1 byte), short (2 bytes), int (4 bytes), and float (4 bytes). As example, the short `1337`, or `0x0539` in hex, would be represented as `[0x39, 0x05]` in the packet data. But that is about as much as we can expect; without the self-describing nature, we won't see patterns like field separators or type IDs to show up and help us. Yet, one could feasibly expect that Silkroad isn't just shoving bytes into packets with a clear idea of structure. And most certainly they are serializing their C/C++ structs into packets, just the structure is lost in translation. In other words, the following struct:
 ```c
 struct Position {
   short x;
@@ -95,13 +95,17 @@ would end up serialized in the packet data as:
 0x69 0x06 0x94 0x0E
 ```
 
-Without the structure, this might as well be 4 single byte values or 1 `int` value (`244581993`) - it all depends on the input structure. There are some things that hint at the size, but these are never a guaranteed indicator. For example, the following byte stream:
+Without the structure, this might as well be 4 single byte values or one `int` value (`244581993`) - it all depends on the expected structure. There are some things that hint at the size, but these are never a guaranteed indicator. For example, the following byte stream:
 ```
 0x01 0x80 0x00 0x00 0x80
 ```
-_could_ hint at an `int` followed by a `char`/`byte`.
+_could_ hint at an `int` followed by a `char`/`byte`, due to the zero bytes being the higher bits of a small number represented by the `int`. But it might as well be a `bool` followed by an `int`. You literally cannot tell just by looking at the bytes alone without context, which makes reverse engineering not a simple task.
 
-A more complex type is a string. While in C, a string is just a series of bytes until a null-byte, it is sometimes accompanied by its length. The same applies to how it is represented in a packet: `short` length, followed by each character, _excluding_ the null byte. Because of the explicit length, there's no need for a null-byte as a terminator. Thankfully, strings are one of the easier structures to figure out, as most tools display the ascii equivalents next to hex values.
+Lets move on for now and look at a more complex "basic" type: a string. While in C, a string is just a series of bytes until a null-byte, it is something that is inherently variable in length. On the reading side, we'd prefer if we could know the length ahead of time. Thus, we're nice and start with the length as a `short`, followed by each character, _excluding_ the null byte. Because of the explicit length, there's no need for a null-byte as a terminator. Thankfully, strings are one of the easier structures to figure out, as most tools display the ascii equivalents next to hex values.
+![Example String Sequence, showing a 2 byte length followed by the characters for 'Skrillax'](/string-data-example.png)
+Ignoring the `0x04` byte for now, we can see the length as `[0x08 0x00]` - so 8 - followed by the text, now clearly visible: 'Skrillax'.
+
+There are even more of such structures, of course, but lets explore them another time.
 
 ## Closing
 
