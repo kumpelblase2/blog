@@ -1,7 +1,6 @@
 ---
 title: "Silkroad Online Network Protocol - an introduction"
-date: 2023-05-24T17:34:19+02:00
-draft: true
+date: 2025-02-09T10:00:00+02:00
 toc: false
 images:
 tags: 
